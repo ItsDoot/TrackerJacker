@@ -1,0 +1,64 @@
+plugins {
+    id 'java'
+}
+
+group = pluginGroup
+version = pluginVersion
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'spigotmc-repo'
+        url 'https://hub.spigotmc.org/nexus/content/groups/public/'
+    }
+    maven {
+        name 'sonatype'
+        url 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        name 'essentials'
+        url 'http://repo.ess3.net/content/groups/essentials'
+    }
+    maven {
+        url 'http://repo.ess3.net/content/repositories/kitteh'
+    }
+    maven {
+        name 'vault-repo'
+        url 'http://nexus.hc.to/content/repositories/pub_releases'
+    }
+    maven {
+        url "http://ci.emc.gs/nexus/content/groups/aikar/"
+    }
+}
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+dependencies {
+    compile 'org.spigotmc:spigot-api:1.11.2-R0.1-SNAPSHOT'
+
+    compile 'net.ess3:Essentials:2.13-SNAPSHOT'
+    compile 'net.milkbowl.vault:VaultAPI:1.6'
+
+    shade 'co.aikar:taskchain-bukkit:3.6.0'
+    shade 'com.mchange:c3p0:0.9.5.2'
+}
+
+import org.apache.tools.ant.filters.ReplaceTokens
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter ReplaceTokens, tokens: [version: version]
+    }
+}
+
+jar {
+    configurations.shade.copyRecursive().setTransitive(true).each { artifact ->
+        from (zipTree(artifact))
+    }
+}

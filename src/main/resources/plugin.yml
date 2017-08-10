@@ -1,0 +1,10 @@
+name: TrackerJacker
+version: @version@
+main: io.github.xdotdash.trackerjacker.TrackerJacker
+softdepend: [Essentials]
+depend: [Vault]
+
+commands:
+  track:
+    description: Track online times.
+    permission: tracker.check
