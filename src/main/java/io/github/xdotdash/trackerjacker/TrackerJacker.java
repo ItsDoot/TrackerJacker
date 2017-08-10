@@ -54,10 +54,7 @@ public final class TrackerJacker extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new TrackerListener(), this);
 
-        TrackCommand cmd = new TrackCommand(
-                cpds
-        );
-        getCommand("track").setExecutor(cmd);
+        getCommand("track").setExecutor(new TrackCommand(cpds));
         getCommand("track").setPermission("tracker.check");
         getCommand("track").setTabCompleter((sender, command, label, args) -> Bukkit.getOnlinePlayers().stream()
                 .filter((player) -> ONLINE_UUIDS.contains(player.getUniqueId().toString()))

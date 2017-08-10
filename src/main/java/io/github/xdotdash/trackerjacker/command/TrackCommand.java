@@ -6,6 +6,7 @@ import co.aikar.taskchain.TaskChainFactory;
 import io.github.xdotdash.trackerjacker.DB;
 import io.github.xdotdash.trackerjacker.util.StaffTime;
 import io.github.xdotdash.trackerjacker.util.Tasks;
+import io.github.xdotdash.trackerjacker.util.TimeUtil;
 import io.github.xdotdash.trackerjacker.util.UUIDFetcher;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -61,7 +62,8 @@ public class TrackCommand implements CommandExecutor {
                     try {
                         Connection conn = ds.getConnection();
 
-                        ResultSet rs = conn.prepareStatement(selectSql(uuid.toString())).executeQuery();
+                        ResultSet rs = conn.prepareStatement("SELECT * FROM " + DB.PLAYERS + " WHERE uuid='" + uuid.toString() + "';")
+                                .executeQuery();
 
                         if (!rs.next()) {
                             return null;
@@ -76,47 +78,30 @@ public class TrackCommand implements CommandExecutor {
                 })
                 .abortIfNull(new NotTrackedAbortAction(sender))
                 .syncLast((time) -> {
-                    int weekTotal = time.getDay0() + time.getDay1() + time.getDay2() + time.getDay3() + time.getDay4()
-                            + time.getDay5() + time.getDay6();
+                    String day0 = TimeUtil.displayMinutes(time.getDay0());
+                    String day1 = TimeUtil.displayMinutes(time.getDay1());
+                    String day2 = TimeUtil.displayMinutes(time.getDay2());
+                    String day3 = TimeUtil.displayMinutes(time.getDay3());
+                    String day4 = TimeUtil.displayMinutes(time.getDay4());
+                    String day5 = TimeUtil.displayMinutes(time.getDay5());
+                    String day6 = TimeUtil.displayMinutes(time.getDay6());
+                    String week = TimeUtil.displayMinutes(time.getDay0() + time.getDay1() + time.getDay2()
+                            + time.getDay3() + time.getDay4() + time.getDay5() + time.getDay6());
 
                     sender.sendMessage(DARK_GRAY + "== " + GOLD + player + DARK_GRAY + " ===============");
-                    sender.sendMessage(GRAY + " Today: " + GOLD + displayTime(time.getDay0()));
-                    sender.sendMessage(GRAY + " Yesterday: " + GOLD + displayTime(time.getDay1()));
-                    sender.sendMessage(GRAY + " 2 Days Ago: " + GOLD + displayTime(time.getDay2()));
-                    sender.sendMessage(GRAY + " 3 Days Ago: " + GOLD + displayTime(time.getDay3()));
-                    sender.sendMessage(GRAY + " 4 Days Ago: " + GOLD + displayTime(time.getDay4()));
-                    sender.sendMessage(GRAY + " 5 Days Ago: " + GOLD + displayTime(time.getDay5()));
-                    sender.sendMessage(GRAY + " 6 Days Ago: " + GOLD + displayTime(time.getDay6()));
-                    sender.sendMessage(GRAY + " Week Total: " + GOLD + displayTime(weekTotal));
+                    sender.sendMessage(GRAY + " Today: " + GOLD + day0);
+                    sender.sendMessage(GRAY + " Yesterday: " + GOLD + day1);
+                    sender.sendMessage(GRAY + " 2 Days Ago: " + GOLD + day2);
+                    sender.sendMessage(GRAY + " 3 Days Ago: " + GOLD + day3);
+                    sender.sendMessage(GRAY + " 4 Days Ago: " + GOLD + day4);
+                    sender.sendMessage(GRAY + " 5 Days Ago: " + GOLD + day5);
+                    sender.sendMessage(GRAY + " 6 Days Ago: " + GOLD + day6);
+                    sender.sendMessage(GRAY + " Week Total: " + GOLD + week);
                     sender.sendMessage(DARK_GRAY + "===" + chained('=', player.length()) + "================");
                 })
                 .execute();
 
         return true;
-    }
-
-    private String selectSql(String uuid) {
-        //language=MySQL
-        return "SELECT * FROM " + DB.PLAYERS + " WHERE uuid='" + uuid + "';";
-    }
-
-    private String displayTime(int minutes) {
-        StringBuilder time = new StringBuilder();
-
-        double days = minutes / 24 / 60;
-        double hours = minutes / 60 % 24;
-        double mins = minutes % 60;
-
-        if (days >= 1)
-            time.append(Math.round(days)).append(days == 1 ? " day " : " days ");
-        if (hours >= 1)
-            time.append(Math.round(hours)).append(hours == 1 ? " hour " : " hours ");
-        if (mins >= 1)
-            time.append(Math.round(mins)).append(mins == 1 ? " min" : " mins");
-
-        String str = time.toString();
-
-        return str.isEmpty() ? "0" : time.toString();
     }
 
     private String chained(char c, int amount) {
